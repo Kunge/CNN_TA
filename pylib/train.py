@@ -63,8 +63,21 @@ def get_train_op(features, labels, total_loss, params):
                     global_step=global_step)
     return train_op
 
-def get_input():
-    pass
+def get_input(generator, params):
+    output_types = {
+        'key1':tf.float32,
+        'key2':tf.int32
+    }
+    dataset = tf.data.Dataset.from_generator(generator,\
+            output_types = output_types)
+    dataset = dataset.map( lambda x : x, num_parallel_calls = 5 )
+    dataset = dataset.prefetch(buffer_size = 100)
+    next_elements = dataset.make_one_shot_iterator().get_next()
+    feature_keys = ['key1']
+    label_keys = ['key2']
+    features = { key: next_elements[key] for key in feature_keys }
+    labels = { key: next_elements[key] for key in label_keys }
+    return features, labels
 
 def eval_metric_operate(loss_dict):
     pass
@@ -106,7 +119,10 @@ def get_estimator(run_config, params):
 
 
 def train():
-    params = tf.contrib.training.HParams()
+    params = tf.contrib.training.HParams(
+        monitor_every_n = 100,
+        evaluate_every_n = 1000
+    )
     params.add_hparam('model_dir', os.path.abspath(tf.flags.FLAGS.model_dir))
     if not os.path.exists(tf.flags.FLAGS.model_dir):
         os.makedirs(tf.flags.FLAGS.model_dir)
@@ -118,6 +134,23 @@ def train():
     run_config = tf.contrib.learn.RunConfig( model_dir = params.model_dir )
     estimator = get_estimator(run_config, params)
     train_input_fn = functools.partial(get_input_fn, feeder.generate_batch, params)
+
+    while True:
+        if estimator.latest_checkpoint() is not None:
+            global_step = estimator.get_variable_value('global_step')
+        else:
+            global_step = 0
+	    tensors_to_log = {
+                'total_loss':'total_loss'
+                }
+        logging_hook = tf.train.LoggingTensorHook(tensors = tensors_to_log,
+                every_n_iter = params.monitor_every_n)
+        train_monitor = MonitorHook('train_fetches', params, feeder = feeder)
+        
+        estimator.train(input_fn = train_input_fn,
+		        hooks = [logging_hook, train_monitor],
+                steps = params.evaluate_every_n -\
+                        (global_step % params.evaluate_every_n))
 
 if __name__ == '__main__':
     train()
