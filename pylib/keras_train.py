@@ -13,44 +13,56 @@ import numpy as np
 import json
 
 model = Sequential()
-model.add(Conv1D(64, 5, padding='valid', input_shape=(120,4)))
-model.add(BatchNormalization(mode=0, axis=1))
-model.add(Activation('relu'))
+model.add(BatchNormalization(mode=0, axis=1,input_shape=(120,4)))
 model.add(Conv1D(64, 5, padding='valid'))
-model.add(BatchNormalization(mode=0, axis=1))
 model.add(Activation('relu'))
+
+model.add(BatchNormalization(mode=0, axis=1))
+model.add(Conv1D(64, 5, padding='valid'))
+model.add(Activation('relu'))
+
 model.add(MaxPooling1D(pool_size=3, strides=2, padding='valid'))
+
 model.add(BatchNormalization(mode=0, axis=1))
 model.add(Conv1D(128, 5, padding='valid'))
-model.add(BatchNormalization(mode=0, axis=1))
 model.add(Activation('relu'))
+
+model.add(BatchNormalization(mode=0, axis=1))
 model.add(Conv1D(128, 5, padding='valid'))
-model.add(BatchNormalization(mode=0, axis=1))
 model.add(Activation('relu'))
+
+model.add(BatchNormalization(mode=0, axis=1))
 model.add(Conv1D(256, 5, padding='valid'))
-model.add(BatchNormalization(mode=0, axis=1))
 model.add(Activation('relu'))
+
+model.add(BatchNormalization(mode=0, axis=1))
 model.add(Conv1D(256, 5, padding='valid'))
-model.add(BatchNormalization(mode=0, axis=1))
 model.add(Activation('relu'))
+
+model.add(BatchNormalization(mode=0, axis=1))
 model.add(Conv1D(128, 5, padding='valid'))
-model.add(BatchNormalization(mode=0, axis=1))
 model.add(Activation('relu'))
+
+model.add(BatchNormalization(mode=0, axis=1))
 model.add(Conv1D(128, 5, padding='valid'))
-model.add(BatchNormalization(mode=0, axis=1))
 model.add(Activation('relu'))
+
+model.add(BatchNormalization(mode=0, axis=1))
 model.add(Conv1D(64, 5, padding='valid'))
-model.add(BatchNormalization(mode=0, axis=1))
 model.add(Activation('relu'))
+
+model.add(BatchNormalization(mode=0, axis=1))
 model.add(Conv1D(64, 5, padding='valid'))
-model.add(BatchNormalization(mode=0, axis=1))
 model.add(Activation('relu'))
+
+model.add(BatchNormalization(mode=0, axis=1))
 model.add(Conv1D(32, 5, padding='valid'))
-model.add(BatchNormalization(mode=0, axis=1))
 model.add(Activation('relu'))
+
+model.add(BatchNormalization(mode=0, axis=1))
 model.add(Conv1D(32, 5, padding='valid'))
-model.add(BatchNormalization(mode=0, axis=1))
 model.add(Activation('relu'))
+
 model.add(MaxPooling1D(pool_size=3, strides=2, padding='valid'))
 model.add(Flatten())
 model.add(Dense(30))
