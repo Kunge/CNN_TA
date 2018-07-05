@@ -6,6 +6,7 @@ from keras.layers import Dense, Dropout, Activation, Flatten
 from keras.layers.convolutional import Conv1D
 from keras.layers.pooling import MaxPooling1D
 from keras.optimizers import SGD
+from keras.layers.normalization import BatchNormalization
 from keras import losses
 import data
 import numpy as np
@@ -13,21 +14,42 @@ import json
 
 model = Sequential()
 model.add(Conv1D(64, 5, padding='valid', input_shape=(120,4)))
+model.add(BatchNormalization())
 model.add(Activation('relu'))
 model.add(Conv1D(64, 5, padding='valid'))
+model.add(BatchNormalization())
 model.add(Activation('relu'))
 model.add(MaxPooling1D(pool_size=3, strides=2, padding='valid'))
+model.add(BatchNormalization())
 model.add(Conv1D(128, 5, padding='valid'))
+model.add(BatchNormalization())
 model.add(Activation('relu'))
 model.add(Conv1D(128, 5, padding='valid'))
+model.add(BatchNormalization())
+model.add(Activation('relu'))
+model.add(Conv1D(256, 5, padding='valid'))
+model.add(BatchNormalization())
+model.add(Activation('relu'))
+model.add(Conv1D(256, 5, padding='valid'))
+model.add(BatchNormalization())
+model.add(Activation('relu'))
+model.add(Conv1D(128, 5, padding='valid'))
+model.add(BatchNormalization())
+model.add(Activation('relu'))
+model.add(Conv1D(128, 5, padding='valid'))
+model.add(BatchNormalization())
 model.add(Activation('relu'))
 model.add(Conv1D(64, 5, padding='valid'))
+model.add(BatchNormalization())
 model.add(Activation('relu'))
 model.add(Conv1D(64, 5, padding='valid'))
+model.add(BatchNormalization())
 model.add(Activation('relu'))
 model.add(Conv1D(32, 5, padding='valid'))
+model.add(BatchNormalization())
 model.add(Activation('relu'))
 model.add(Conv1D(32, 5, padding='valid'))
+model.add(BatchNormalization())
 model.add(Activation('relu'))
 model.add(MaxPooling1D(pool_size=3, strides=2, padding='valid'))
 model.add(Flatten())
