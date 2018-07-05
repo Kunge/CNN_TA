@@ -13,7 +13,7 @@ class HSFeeder:
         self._predict_len = params['predict_len']#prediction window size
 
         self._filename_list = self._get_filename_list(self._data_dir)
-        sample_size = 10#int(len(self._filename_list)*0.6)
+        sample_size = int(len(self._filename_list)*0.8)
         self._training_files = np.random.choice( self._filename_list, size = sample_size )
         #self._dataset = self._load_data()
     
@@ -24,28 +24,29 @@ class HSFeeder:
                 filename_list.append( os.path.join(root, name) )
         return filename_list
 
-    def _load_data(self):
+    def _load_data(self, sample_files):
         dataset = dict()
-        for filename in self._filename_list:
+        for filename in sample_files:
             data = json.load( open(filename) )
             dataset[filename] = data
-            time.sleep(0.01)
         return dataset
 
     def generate_batch(self):
         while True:
-            batch_data = self._get_batch_data()
+            sample_files = np.random.choice( self._training_files, size = 100 )
+            dataset = self._load_data(sample_files)
+            batch_data = self._get_batch_data(sample_files,dataset)
             yield batch_data['x'], batch_data['y']
 
-    def _get_batch_data(self):
+    def _get_batch_data(self, sample_files, dataset):
         batch_data = dict()
         training = []
         target = []
         for i in range(self._batch_size):
             length = 0
             while length < self._win_len+self._predict_len+10:
-                filename = np.random.choice( self._training_files )
-                data = json.load( open(filename) )
+                filename = np.random.choice( sample_files )
+                data = dataset[filename]
                 length = len(data)
             start = np.random.choice( length-self._win_len-self._predict_len-1 )
             training_data = data[start:start+self._win_len]
