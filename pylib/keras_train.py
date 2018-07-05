@@ -73,12 +73,14 @@ model.compile(loss=losses.mean_squared_error, optimizer=sgd)
 params = {'data_dir':'../data/day','batch_size':256, 'win_len':120, 'predict_len':30}
 feeder = data.HSFeeder(params)
 train_generator = feeder.generate_batch()
+num = 0
 while True:
+    num = num +1
     model.fit_generator(train_generator, steps_per_epoch = 100, epochs=1, max_q_size=100, workers=5)
-
-js_model = model.to_json()
-model_json = open('model.json','w')
-json.dump(js_model, model_json)
+    if num%20 == 0:
+        js_model = model.to_json()
+        model_json = open('model.json','w')
+        json.dump(js_model, model_json)
 
 print("test set")
 scores = model.evaluate(X_train,Y_train)

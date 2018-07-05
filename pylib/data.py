@@ -41,12 +41,12 @@ class HSFeeder:
         batch_data = dict()
         training = []
         target = []
-        length = 0
-        while length < self._win_len+self._predict_len+10:
-            filename = np.random.choice( self._training_files )
-            data = json.load( open(filename) )
-            length = len(data)
         for i in range(self._batch_size):
+            length = 0
+            while length < self._win_len+self._predict_len+10:
+                filename = np.random.choice( self._training_files )
+                data = json.load( open(filename) )
+                length = len(data)
             start = np.random.choice( length-self._win_len-self._predict_len-1 )
             training_data = data[start:start+self._win_len]
             target_data = data[start+self._win_len:start+self._win_len+self._predict_len]
