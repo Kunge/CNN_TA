@@ -14,6 +14,7 @@ import data
 import numpy as np
 import json
 import sys, os
+import matplotlib.pyplot as pp
 
 json_str = json.load(open('mymodel.json'))
 model = model_from_json(json_str)
@@ -22,6 +23,14 @@ model_path = 'mymodel.h5'
 if os.path.exists(model_path):
     model.load_weights(model_path)
 
-params = {'data_dir':'../data/day','batch_size':256, 'win_len':120, 'predict_len':30}
+params = {'data_dir':'../data/day','batch_size':32, 'win_len':120, 'predict_len':30}
 feeder = data.HSFeeder(params)
-train_generator = feeder.generate_batch()
+X,Y, base = feeder.generate_one_sample()
+pred = model.predict(X)
+pred = pred+base
+Y = Y+base
+
+for i in range(10):
+    pp.plot(pred[i],c='r')
+    pp.plot(Y[i],c='g')
+    pp.show()

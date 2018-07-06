@@ -33,25 +33,48 @@ class HSFeeder:
                 dataset[filename] = data
                 new_sample_files.append(filename)
         return dataset, new_sample_files
+    
+    def generate_one_sample(self):
+        sample_file = np.random.choice( self._training_files, size = 1 )
+        dataset, sample_file = self._load_data(sample_file)
+        batch_data = self._get_batch_data(sample_file,dataset)
+        return batch_data['x'], batch_data['y'], batch_data['base_price']
 
     def generate_batch(self):
         while True:
             sample_files = np.random.choice( self._training_files, size = self._batch_size*2 )
             dataset, sample_files = self._load_data(sample_files)
             batch_data = self._get_batch_data(sample_files,dataset)
-            yield batch_data['x'], batch_data['y']
+            yield batch_data['x'], batch_data['labels']
 
     def _get_batch_data(self, sample_files, dataset):
         batch_data = dict()
         training = []
         target = []
-        for i in range(self._batch_size):
+        labels = []
+        i = 0
+        while i < self._batch_size:
             filename = np.random.choice( sample_files )
             data = dataset[filename]
             length = len(data)
             start = np.random.choice( length-self._win_len-self._predict_len-1 )
             training_data = data[start:start+self._win_len]
             target_data = data[start+self._win_len:start+self._win_len+self._predict_len]
+            base_price = training_data[-1]['close']
+            y=[]
+            for k in target_data:
+                c = k['close']
+                y.append(c)
+            label = -1
+            if max(y)>base_price*1.8 and min(y)>base_price*0.8:
+                label = 1
+            if min(y)<base_price*0.6 and max(y)<base_price*1.2:
+                label = 0
+            
+            if label < 0:
+                continue
+            labels.append(label)
+            i = i +1
             x=[]
             for k in training_data:
                 o = k['open']
@@ -65,16 +88,15 @@ class HSFeeder:
             x[:,1] = x[:,1]-np.mean(x[:,1])
             x[:,2] = x[:,2]-np.mean(x[:,2])
             x[:,3] = x[:,3]-np.mean(x[:,3])
-            y=[]
-            for k in target_data:
-                c = k['close']
-                y.append(c)
+        
             y = np.array(y)
-            y = y-training_data[-1]['close']
+            y = y-base_price
             training.append(x)
             target.append(y)
         batch_data['x'] = np.array(training)
         batch_data['y'] = np.array(target)
+        batch_data['labels'] = np.array(labels)
+        batch_data['base_price'] = training_data[-1]['close']
         return batch_data
 
 if __name__ == '__main__':
