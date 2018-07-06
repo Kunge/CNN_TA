@@ -66,16 +66,20 @@ class HSFeeder:
             offset = 0
             if np.abs(base_price-last_price)/min(base_price,last_price) > 1.2:
                 offset = base_price-last_price
-                
+
             y=[]
             for k in target_data:
                 c = k['close']
                 y.append(c-offset)
             label = -1
-            if max(y)>base_price*1.8 and min(y)>base_price*0.8:
-                label = 1
-            if min(y)<base_price*0.6 and max(y)<base_price*1.2:
-                label = 0
+            if max(y)>base_price*1.8 and np.sum(labels)<self._batch_size*0.6:
+                idx = np.argmax(y)
+                if min(y[:idx])>base_price*0.8:
+                    label = 1
+            if min(y)<base_price*0.6 and ( len(labels)-np.sum(labels) ) < self._batch_size*0.6:
+                idx = np.argmin(y)
+                if max(y[:idx])<base_price*1.2:
+                    label = 0
             
             if label < 0:
                 continue
