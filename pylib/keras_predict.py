@@ -23,14 +23,27 @@ model_path = 'mymodel.h5'
 if os.path.exists(model_path):
     model.load_weights(model_path)
 
-params = {'data_dir':'../data/day','batch_size':32, 'win_len':120, 'predict_len':30}
+params = {'data_dir':'../data/day','batch_size':32, 'win_len':200, 'predict_len':100}
 feeder = data.HSFeeder(params)
-X,Y, base = feeder.generate_one_sample()
-pred = model.predict(X)
-pred = pred+base
-Y = Y+base
+batch_data= feeder.generate_one_sample()
+X = batch_data['x']
+Y = batch_data['y']
+base = batch_data['base_price']
+original_x = batch_data['original_x']
+labels = batch_data['labels']
 
+pred = model.predict(X)
+pred = pred
+Y = Y
+
+print(pred)
+print(labels)
 for i in range(10):
-    pp.plot(pred[i],c='r')
-    pp.plot(Y[i],c='g')
+    sample = original_x[i,:,1].reshape(-1,1)
+    pp.figure(figsize = [300, 100])    
+    pp.plot(range(200),sample, c='b')
+    if pred[i] > 0.5:
+        pp.plot(range(200,300),Y[i],c='r')
+    else:
+        pp.plot(range(200,300),Y[i],c='g')
     pp.show()

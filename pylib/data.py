@@ -38,7 +38,7 @@ class HSFeeder:
         sample_file = np.random.choice( self._training_files, size = 1 )
         dataset, sample_file = self._load_data(sample_file)
         batch_data = self._get_batch_data(sample_file,dataset)
-        return batch_data['x'], batch_data['y'], batch_data['base_price']
+        return batch_data
 
     def generate_batch(self):
         while True:
@@ -52,6 +52,7 @@ class HSFeeder:
         training = []
         target = []
         labels = []
+        training_original = []
         i = 0
         while i < self._batch_size:
             filename = np.random.choice( sample_files )
@@ -60,11 +61,16 @@ class HSFeeder:
             start = np.random.choice( length-self._win_len-self._predict_len-1 )
             training_data = data[start:start+self._win_len]
             target_data = data[start+self._win_len:start+self._win_len+self._predict_len]
-            base_price = training_data[-1]['close']
+            last_price = training_data[-1]['close']
+            base_price = target_data[0]['close']
+            offset = 0
+            if np.abs(base_price-last_price)/min(base_price,last_price) > 1.2:
+                offset = base_price-last_price
+                
             y=[]
             for k in target_data:
                 c = k['close']
-                y.append(c)
+                y.append(c-offset)
             label = -1
             if max(y)>base_price*1.8 and min(y)>base_price*0.8:
                 label = 1
@@ -75,28 +81,31 @@ class HSFeeder:
                 continue
             labels.append(label)
             i = i +1
-            x=[]
+            original_x=[]
             for k in training_data:
                 o = k['open']
                 c = k['close']
                 h = k['high']
                 l = k['low']
                 a = np.array([o,c,h,l]).reshape([-1,1])
-                x.append(a)
-            x = np.squeeze(x)
-            x[:,0] = x[:,0]-np.mean(x[:,0])
-            x[:,1] = x[:,1]-np.mean(x[:,1])
-            x[:,2] = x[:,2]-np.mean(x[:,2])
-            x[:,3] = x[:,3]-np.mean(x[:,3])
-        
+                original_x.append(a)
+            original_x = np.squeeze(original_x)
+            x= np.column_stack( ( original_x[:,0]-np.mean(original_x[:,0]),
+                original_x[:,1]-np.mean(original_x[:,1]),
+                original_x[:,2]-np.mean(original_x[:,2]),
+                original_x[:,3]-np.mean(original_x[:,3])
+            )
+            )
+
             y = np.array(y)
-            y = y-base_price
             training.append(x)
+            training_original.append(original_x)
             target.append(y)
         batch_data['x'] = np.array(training)
         batch_data['y'] = np.array(target)
         batch_data['labels'] = np.array(labels)
         batch_data['base_price'] = training_data[-1]['close']
+        batch_data['original_x'] = np.array(training_original)
         print(np.sum(labels))
         return batch_data
 
