@@ -26,15 +26,18 @@ class HSFeeder:
 
     def _load_data(self, sample_files):
         dataset = dict()
+        new_sample_files = []
         for filename in sample_files:
             data = json.load( open(filename) )
-            dataset[filename] = data
-        return dataset
+            if len(data)>self._win_len+self._predict_len+10:
+                dataset[filename] = data
+                new_sample_files.append(filename)
+        return dataset, new_sample_files
 
     def generate_batch(self):
         while True:
-            sample_files = np.random.choice( self._training_files, size = 100 )
-            dataset = self._load_data(sample_files)
+            sample_files = np.random.choice( self._training_files, size = self._batch_size*2 )
+            dataset, sample_files = self._load_data(sample_files)
             batch_data = self._get_batch_data(sample_files,dataset)
             yield batch_data['x'], batch_data['y']
 
@@ -43,11 +46,9 @@ class HSFeeder:
         training = []
         target = []
         for i in range(self._batch_size):
-            length = 0
-            while length < self._win_len+self._predict_len+10:
-                filename = np.random.choice( sample_files )
-                data = dataset[filename]
-                length = len(data)
+            filename = np.random.choice( sample_files )
+            data = dataset[filename]
+            length = len(data)
             start = np.random.choice( length-self._win_len-self._predict_len-1 )
             training_data = data[start:start+self._win_len]
             target_data = data[start+self._win_len:start+self._win_len+self._predict_len]
@@ -60,10 +61,16 @@ class HSFeeder:
                 a = np.array([o,c,h,l]).reshape([-1,1])
                 x.append(a)
             x = np.squeeze(x)
+            x[:,0] = x[:,0]-np.mean(x[:,0])
+            x[:,1] = x[:,1]-np.mean(x[:,1])
+            x[:,2] = x[:,2]-np.mean(x[:,2])
+            x[:,3] = x[:,3]-np.mean(x[:,3])
             y=[]
             for k in target_data:
                 c = k['close']
                 y.append(c)
+            y = np.array(y)
+            y = y-training_data[-1]['close']
             training.append(x)
             target.append(y)
         batch_data['x'] = np.array(training)

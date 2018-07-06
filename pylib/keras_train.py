@@ -83,7 +83,7 @@ model.compile(loss=losses.mean_squared_error, optimizer=sgd)
 checkpoint = ModelCheckpoint(filepath=model_path, monitor='loss', verbose=1, save_best_only=True, mode='min')
 callbacks_list = [checkpoint]
 
-params = {'data_dir':'../data/day','batch_size':256, 'win_len':120, 'predict_len':30}
+params = {'data_dir':'../data/day','batch_size':32, 'win_len':120, 'predict_len':30}
 feeder = data.HSFeeder(params)
 train_generator = feeder.generate_batch()
 model.fit_generator(train_generator, steps_per_epoch = 100, epochs=1000, max_q_size=100, workers=5, callbacks=callbacks_list)
