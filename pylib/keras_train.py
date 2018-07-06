@@ -17,14 +17,13 @@ import sys, os
 #model define
 model = Sequential()
 model.add(BatchNormalization(axis=1,input_shape=(100,4)))
+model.add(MaxPooling1D(pool_size=5, strides = 2))
 model.add(Conv1D(64, 5, padding='valid'))
 model.add(Activation('relu'))
 
 model.add(BatchNormalization(axis=1))
 model.add(Conv1D(64, 5, padding='valid'))
 model.add(Activation('relu'))
-
-model.add(MaxPooling1D(pool_size=3, strides=2, padding='valid'))
 
 model.add(BatchNormalization(axis=1))
 model.add(Conv1D(128, 5, padding='valid'))
@@ -63,13 +62,12 @@ model.add(Conv1D(32, 5, padding='valid'))
 model.add(Activation('relu'))
 
 model.add(BatchNormalization(axis=1))
-model.add(Conv1D(32, 5, padding='valid'))
-model.add(Activation('relu'))
-
-model.add(MaxPooling1D(pool_size=3, strides=2, padding='valid'))
 model.add(Flatten())
+model.add(Activation('relu'))
+
 model.add(BatchNormalization())
 model.add(Dense(50))
+
 model.add(BatchNormalization())
 model.add(Dense(3,activation='softmax'))
 #model define finished

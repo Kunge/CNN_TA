@@ -43,7 +43,7 @@ class HSFeeder:
         labels = []
         training_original = []
         i = 0
-        while i < self._batch_size:
+        while i < 10:
             filename = np.random.choice( sample_files )
             data = dataset[filename]
             length = len(data)

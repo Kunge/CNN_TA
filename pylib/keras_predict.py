@@ -31,21 +31,19 @@ Y = batch_data['y']
 base = batch_data['base_price']
 original_x = batch_data['original_x']
 
-preds = model.predict(X).reshape(-1)
+preds = model.predict(X).reshape(-1,3)
 Y = Y
 print(preds)
 i = -1
-high = 0.8
-low = 0.3
 for pred in preds:
     i = i + 1
     sample = original_x[i,:,1].reshape(-1,1)
     pp.figure(figsize = [300, 100])    
     pp.plot(range(100),sample, c='b')
-    if pred > high:
+    if pred[1] > 0.5:
         pp.plot(range(100,300),Y[i],c='r')
-    if pred < low:
+    if pred[2] > 0.5:
         pp.plot(range(100,300),Y[i],c='g')
-    if pred > low and pred < high:
+    if pred[0] > 0.5:
         pp.plot(range(100,300),Y[i],c='y')
     pp.show()
