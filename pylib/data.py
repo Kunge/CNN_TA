@@ -97,6 +97,7 @@ class HSFeeder:
         batch_data['y'] = np.array(target)
         batch_data['labels'] = np.array(labels)
         batch_data['base_price'] = training_data[-1]['close']
+        print(np.sum(labels))
         return batch_data
 
 if __name__ == '__main__':

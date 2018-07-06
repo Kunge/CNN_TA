@@ -90,4 +90,4 @@ callbacks_list = [checkpoint]
 params = {'data_dir':'../data/day','batch_size':32, 'win_len':200, 'predict_len':100}
 feeder = data.HSFeeder(params)
 train_generator = feeder.generate_batch()
-model.fit_generator(train_generator, steps_per_epoch = 100, epochs=1000, max_q_size=100, workers=5, callbacks=callbacks_list)
+model.fit_generator(train_generator, steps_per_epoch = 1, epochs=100000, max_q_size=100, workers=5, callbacks=callbacks_list)
