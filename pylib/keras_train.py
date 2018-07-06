@@ -12,7 +12,9 @@ from keras.callbacks import ModelCheckpoint
 import data
 import numpy as np
 import json
+import sys, os
 
+#model define
 model = Sequential()
 model.add(BatchNormalization(mode=0, axis=1,input_shape=(120,4)))
 model.add(Conv1D(64, 5, padding='valid'))
@@ -67,11 +69,18 @@ model.add(Activation('relu'))
 model.add(MaxPooling1D(pool_size=3, strides=2, padding='valid'))
 model.add(Flatten())
 model.add(Dense(30))
+#model define finished
+json_string = model.to_json()
+json.dump(json_string, open('mymodel.json','w'))
+
+model_path = 'mymodel.h5'
+if os.path.exists(model_path):
+    model.load_weights(model_path)
 
 sgd = SGD(lr=0.000001, decay=0.0005, momentum=0.9, nesterov=True)
 model.compile(loss=losses.mean_squared_error, optimizer=sgd)
 
-checkpoint = ModelCheckpoint(filepath='mymodel.h5', monitor='loss', verbose=1, save_best_only=True, mode='min')
+checkpoint = ModelCheckpoint(filepath=model_path, monitor='loss', verbose=1, save_best_only=True, mode='min')
 callbacks_list = [checkpoint]
 
 params = {'data_dir':'../data/day','batch_size':256, 'win_len':120, 'predict_len':30}
